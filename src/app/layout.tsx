@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" >
-        <body>
+        <body className="bg-white dark:bg-black text-black dark:text-white">
           <ThemeProvider attribute="class">
             {children}
           </ThemeProvider>
