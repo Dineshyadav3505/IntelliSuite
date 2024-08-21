@@ -5,6 +5,7 @@ import {Menu, Sun, MoonStar} from 'lucide-react';
 import { UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
+import Mobilebar from './Mobilebar';
 
 export const Navbar = () => {
   
@@ -30,7 +31,7 @@ export const Navbar = () => {
     } else {
       setLogin(false);
     }
-  }, [setLogin]);
+  }, []);
 
 
 
@@ -41,23 +42,13 @@ export const Navbar = () => {
           <Link  href="/" className=' font-Alice capitalize text-xl lg:text-2xl'>{process.env.NEXT_PUBLIC_PROJECTNAME}</Link>
           <div className=" flex gap-3 md:hidden">
             {theme === 'dark' ? <Sun onClick={changeTheme}/> : <MoonStar onClick={changeTheme}/>}
-            <Menu className=''/>
+            <UserButton />
+            <Mobilebar />
           </div>
         </div>
           <div className='hidden md:flex justify-end items-center gap-3 w-1/2'>
             {theme === 'dark' ? <Sun onClick={changeTheme}/> : <MoonStar onClick={changeTheme}/>}
-            {login === true ? (
-              <UserButton />
-            ) : (
-              <>
-                <Button>
-                  <Link href="/sign-up">Sign Up</Link>
-                </Button>
-                <Button>
-                  <Link href="/sign-in">Sign In</Link>
-                </Button>
-              </>
-            )}
+            {login && <UserButton /> }
           </div>
 
       </div>
