@@ -18,15 +18,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Check for API key
-        if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
-            return NextResponse.json({ error: "Missing OpenAI API Key" }, { status: 500 });
-        }
 
         // Check for message content
         if (!message) {
             return NextResponse.json({ error: "Message is required" }, { status: 400 });
         }
+
+        // Check for API key
+        if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
+            return NextResponse.json({ error: "Missing OpenAI API Key" }, { status: 500 });
+        }
+
 
         // Create a chat completion request
         const response = await openai.chat.completions.create({
