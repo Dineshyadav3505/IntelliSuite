@@ -1,28 +1,63 @@
-import React from 'react';
+'use client'
+import React,{useEffect} from 'react';
 import { Button } from "@/components/ui/button";
-import {Menu } from 'lucide-react';
+import {Menu, Sun, MoonStar} from 'lucide-react';
 import { UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
 
 export const Navbar = () => {
-//   const { isSignedIn } = useUser(); // Use useUser to get the authentication state
+  
+  const [theme, setTheme] = React.useState('light');
+  const [login, setLogin] = React.useState(false);
+
+  const changeTheme = () => {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+      setTheme('light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+      setTheme('dark');
+    }
+  };
+
+  useEffect(() => {
+    const isLogin = Cookies.get('__session_3gCryqYE'); 
+    if (isLogin) {
+      setLogin(true);
+    } else {
+      setLogin(false);
+    }
+  }, [setLogin]);
+
+
 
   return (
-    <nav className="flex items-cente py-4 ">
+    <nav className="flex fixed w-full z-20 bg-white dark:bg-black items-cente py-4 ">
       <div className="flex w-full items-center justify-between px-5 lg:px-8">
         <div className=" w-full lg:w-1/2 flex justify-between">
-          <h1 className=' font-Alice capitalize text-xl lg:text-2xl'>{process.env.NEXT_PUBLIC_PROJECTNAME}</h1>
-          <Menu className='md:hidden' />
+          <Link  href="/" className=' font-Alice capitalize text-xl lg:text-2xl'>{process.env.NEXT_PUBLIC_PROJECTNAME}</Link>
+          <div className=" flex gap-3 md:hidden">
+            {theme === 'dark' ? <Sun onClick={changeTheme}/> : <MoonStar onClick={changeTheme}/>}
+            <Menu className=''/>
+          </div>
         </div>
           <div className='hidden md:flex justify-end items-center gap-3 w-1/2'>
-            <UserButton /> 
+            {theme === 'dark' ? <Sun onClick={changeTheme}/> : <MoonStar onClick={changeTheme}/>}
+            {login === true ? (
+              <UserButton />
+            ) : (
+              <>
                 <Button>
-                <Link href="/sign-up">Sign Up</Link>
+                  <Link href="/sign-up">Sign Up</Link>
                 </Button>
-
                 <Button>
-                <Link href="/sign-in">Sign  In</Link>
+                  <Link href="/sign-in">Sign In</Link>
                 </Button>
+              </>
+            )}
           </div>
 
       </div>
