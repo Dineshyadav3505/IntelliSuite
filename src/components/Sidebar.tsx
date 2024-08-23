@@ -42,6 +42,10 @@ const Sidebar = () => {
             icon: Music, 
             route: '/music'
         },
+
+    ];
+
+    const signupin = [
         {
             name: "Sign Up",
             icon: Signature,
@@ -52,7 +56,7 @@ const Sidebar = () => {
             icon: LogIn,
             route: "/sign-in" // Fixed route to "/sign-in"
         }
-    ];
+    ]
 
     const pathname = usePathname();
 
@@ -88,6 +92,18 @@ const Sidebar = () => {
 
             {/* Large screen */}
             {route.map((item, index) => (
+                <Link
+                    href={item.route}
+                    key={index}
+                    className={`hidden lg:flex w-full items-center py-2 px-7 hover:scale-105 duration-150 rounded-sm ${
+                        pathname === item.route ? 'dark:bg-zinc-800 bg-zinc-100' : ''
+                    }`}
+                >
+                    <item.icon className={cn("h-6 w-6 mr-2")} />
+                    {item.name}
+                </Link>
+            ))}
+            {signupin.map((item, index) => (
                 <Link
                     href={item.route}
                     key={index}

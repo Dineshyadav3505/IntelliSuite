@@ -1,3 +1,4 @@
+// frontend/pages/conversation.tsx
 "use client";
 import { z } from "zod";
 import { Heading } from "@/components/Heading";
@@ -11,11 +12,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import {Empty} from "@/components/Empty";
+
+// Define a type for messages
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 const Conversation = () => {
   const router = useRouter();
-  const [messages, setMessages] = useState<ChatCompletionMessageParam[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -26,51 +35,46 @@ const Conversation = () => {
   const isSubmitting = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
     try {
-      const userMessage: ChatCompletionMessageParam = {
+      const userMessage: Message = {
         role: "user",
         content: values.prompt,
       };
       const newMessages = [...messages, userMessage];
 
+      // Clear previous error
+      setError(null);
+
       // Send the user message to the API
-      const response = await axios.post("/api/conversation", { message: newMessages });
+      const response = await axios.post("/api/conversation", { message: userMessage.content });
 
-      // Assuming the API returns a structured response
-      const assistantMessage: ChatCompletionMessageParam = {
-        role: "assistant",
-        content: response.data.message.content, // Adjust this based on your API response structure
-      };
+      if (response.data.error) {
+        setError(response.data.error);
+        console.log("response.data.error");
+      } else {
+        // Assuming the API returns a structured response
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: response.data || "No response generated", // Adjust based on your API response
+        };
+        console.log(response);
 
-      // Update messages state
-      setMessages((current) => [...current, userMessage, assistantMessage]);
-      form.reset();
+        // Update messages state
+        setMessages((current) => [...current, userMessage, assistantMessage]);
+        form.reset();
+      }
     } catch (error: any) {
       console.error("Error sending message:", error);
+      setError("An error occurred while sending your message. Please try again.");
     } finally {
       router.refresh();
     }
   };
 
   // Function to render message content safely
-  const renderMessageContent = (content: string | ChatCompletionMessageParam[] | null | undefined) => {
-    if (!content) {
-      return <span>No content available</span>; // Handle null or undefined content
-    }
-
-    if (Array.isArray(content)) {
-      // If content is an array, map through and render each part
-      return content.map((part, index) => {
-        if (typeof part === "string") {
-          return <span key={index}>{part}</span>;
-        }
-        // Handle other types if necessary
-        return null; // Handle cases where part is not a string
-      });
-    }
-
-    return <span>{content}</span>; // Render as a string
+  const renderMessageContent = (content: string) => {
+    if (!content) return <span>No content available</span>;
+    return <span>{content}</span>;
   };
 
   return (
@@ -82,7 +86,7 @@ const Conversation = () => {
         bgColor="bg-violet-500/20"
         iconColor="text-violet-500"
       />
-      <div className="px-4 lg:px-8 py-6">
+      <div className="px-4 lg:px-8 py-6 flex flex-col gap-4">
         <div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="rounded-lg border w-full py-4 px-3 md:px-3 focus-within:shadow-sm flex flex-col lg:flex-row gap-2">
@@ -111,14 +115,25 @@ const Conversation = () => {
             </form>
           </Form>
         </div>
-        <div className="space-y-4 mt-4">
+        <div className="space-y-4 mt-4 flex-1 overflow-y-auto">
           <div className="flex flex-col-reverse gap-y-4">
-            {messages.map((message, index) => (
-              <div className="message" key={index}>
-                <strong>{message.role === "user" ? "You: " : "Assistant: "}</strong>
-                {renderMessageContent(message.content)} {/* Call the render function */}
+            {messages.length === 0 ? (
+              <div className="text-center">
+                <Empty lable="No Conversation started." />
               </div>
-            ))}
+            ) : (
+              messages.map((message, index) => (
+                <div className="message" key={index}>
+                  {error && index === messages.length - 1 && (
+                    <div className="text-red-500">{error}</div>
+                  )}
+                  <div className="flex gap-2">
+                    <strong className="text-gray-500 dark:text-gray-400">{message.role === "user" ? "You: " : "Assistant: "}</strong>
+                    <div>{renderMessageContent(message.content)}</div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
