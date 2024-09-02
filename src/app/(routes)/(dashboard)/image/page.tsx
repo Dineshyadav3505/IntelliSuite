@@ -1,7 +1,7 @@
 "use client";
 import { z } from "zod";
 import { Heading } from "@/components/Heading";
-import { ImageIcon } from "lucide-react";
+import {Download, ImageIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { amountOptions, resolutionOptions, formSchema } from "./constants";
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Card, CardFooter } from "@/components/ui/card";
 
 // Define a type for images
 type ImageResponse = {
@@ -177,17 +178,26 @@ const Image = () => {
                 <Empty label="No Image Generated." />
               </div>
             ) : (
-              images.map((image, index) => (
-                <div className="message" key={index}>
-                  {error && index === images.length - 1 && (
-                    <div className="text-red-500">{error}</div>
-                  )}
-                  <div className="flex gap-2">
-                    <strong className="text-gray-500 dark:text-gray-400">{image.role === "user" ? "You: " : "Assistant: "}</strong>
-                    <div>{renderMessageContent(image.content)}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
+              {images.map((src, i) => (
+                <Card key={src} className="rounded-lg overflow-hidden">
+                  <div className="relative aspect-square">
+                    <Image src={src} alt={`Generated image ${i + 1}`} fill />
                   </div>
-                </div>
-              ))
+  
+                  <CardFooter className="p-2">
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => window.open(src)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
             )}
           </div>
         </div>
