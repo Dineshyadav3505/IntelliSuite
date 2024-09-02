@@ -1,10 +1,9 @@
 "use client";
 import { z } from "zod";
 import { Heading } from "@/components/Heading";
-import { MessageSquare, Video } from "lucide-react";
+import { Video } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { formSchema } from "./constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -19,9 +18,10 @@ type Message = {
   content: string;
 };
 
-interface emptyProps {
-  lable: string;
-}
+// Define the form schema using Zod
+const formSchema = z.object({
+  prompt: z.string().min(1, "Prompt is required"),
+});
 
 const VideoGeneration = () => {
   const router = useRouter();
@@ -49,7 +49,7 @@ const VideoGeneration = () => {
 
     try {
       // Send the user message to the API
-      const response = await axios.post("/api/conversation", { message: userMessage.content });
+      const response = await axios.post("/api/video", { message: userMessage.content });
 
       // Check for errors in the response
       if (response.data.error) {
@@ -66,15 +66,10 @@ const VideoGeneration = () => {
         setMessages((current) => [...current, assistantMessage]);
         form.reset();
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Error sending message:", error);
-
-      if (error === "Unauthorized") {
-        return router.push("/sign-in");
-      }else{
-        setError("Internal Server Error");
-      }
-    } 
+      setError("An error occurred while generating the video. Please try again later.");
+    }
   };
 
   // Function to render message content safely
@@ -124,9 +119,8 @@ const VideoGeneration = () => {
         <div className="space-y-4 mt-4 flex-1 overflow-y-auto">
           <div className="flex flex-col-reverse gap-y-4">
             {messages.length === 0 ? (
-              <div className="text-center">
-                <Empty label="No Conversation Started." />
-              </div>) : (
+              <Empty label="No video generated yet." />
+            ) : (
               messages.map((message, index) => (
                 <div className="message" key={index}>
                   {error && index === messages.length - 1 && (
@@ -139,7 +133,7 @@ const VideoGeneration = () => {
                 </div>
               ))
             )}
-          </div>
+          </div>  
         </div>
       </div>
     </div>
