@@ -41,10 +41,10 @@ export async function POST(req: NextRequest) {
 
       try {
         const response = await openai.images.generate({
-          model: "dall-e-3", // Specify the model you want to use
+          model: "dall-e-3", 
           prompt: prompt,
-          n: parseInt(amount, 10), // Ensure amount is an integer
-          size: resolution, // Set the desired resolution
+          n: parseInt(amount, 10),
+          size: resolution, 
         });
 
     return NextResponse.json(response.data, { status: 200 });
@@ -52,4 +52,5 @@ export async function POST(req: NextRequest) {
     console.error("[IMAGE_ERROR]: ", error);
     return new NextResponse("Internal server error.", { status: 500 });
   }
+}
 }
