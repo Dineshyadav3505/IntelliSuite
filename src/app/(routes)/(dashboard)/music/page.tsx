@@ -1,10 +1,10 @@
 "use client";
 import { z } from "zod";
 import { Heading } from "@/components/Heading";
-import {Download, Music } from "lucide-react";
+import { Music } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { amountOptions, resolutionOptions, formSchema } from "./constants";
+import { formSchema } from "./constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Empty } from "@/components/Empty";
-import { Card, CardFooter } from "@/components/ui/card";
+
 
 // Define a type for images
 type ImageResponse = {
