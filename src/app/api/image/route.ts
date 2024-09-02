@@ -1,6 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { OpenAI } from "openai"; // Use OpenAI directly
+import { OpenAI } from "openai"; 
+import Configuration  from "openai";
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 
 export async function POST(req: NextRequest) {

@@ -1,6 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import replicate from "replicate"; // Ensure you have replicate imported correctly
+import Replicate from "replicate"; 
+
+const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
+});
+
 
 export async function POST(req: NextRequest) {
   try {
