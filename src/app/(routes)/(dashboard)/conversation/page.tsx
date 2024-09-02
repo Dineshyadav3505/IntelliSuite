@@ -116,7 +116,7 @@ const Conversation = () => {
           </Form>
         </div>
         <div className="space-y-4 mt-4 flex-1 overflow-y-auto">
-          <div className="flex flex-col-reverse gap-y-4">
+          <div className="flex flex-col-reverse gap-y-4"> 
             {messages.length === 0 ? (
               <div className="text-center">
                 <Empty lable="No Conversation started." />
