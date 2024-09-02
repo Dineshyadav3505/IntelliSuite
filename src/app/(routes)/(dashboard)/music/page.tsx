@@ -29,8 +29,6 @@ const MucisGeneration = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       prompt: "",
-      amount: "1",
-      resolution: "512x512",
     },
   });
 
@@ -38,27 +36,27 @@ const MucisGeneration = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log("Form values:", values);
 
       setMusic("");
 
       const response = await axios.post("/api/music", values);
-
+     
       console.log("Response received:", response.data.audio);
 
-      setMusic(response.data.audio); 
 
-      form.reset();
+      setMusic(response.data.audio);
+
+      form.reset(); 
     } catch (error: any) {
       console.error("Error sending message:", error);
       if (error.response) {
-        console.error("Error response data:", error.response.data); // Log detailed error response
+        console.error("Error response data:", error.response.data);
         setError(error.response.data.message || "An error occurred while sending your message. Please try again.");
       } else {
         setError("An error occurred while sending your message. Please try again.");
       }
     } finally {
-      router.refresh(); // Refresh the router if needed
+      router.refresh();
     }
   };
 
@@ -107,6 +105,12 @@ const MucisGeneration = () => {
         </Form>
         <div className="space-y-4 mt-4 flex-1 overflow-y-auto">
           <div className="flex flex-col-reverse gap-y-4">
+            {!music && <Empty label="No Music Generated!" />}
+            {music && (
+              <audio controls className="w-full">
+                <source src={music} type="audio/mpeg" />
+              </audio>
+            )}
 
           </div>
         </div>

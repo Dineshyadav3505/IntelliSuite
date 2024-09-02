@@ -180,7 +180,7 @@ const Image = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
               {images.map((src, i) => (
-                <Card key={src} className="rounded-lg overflow-hidden">
+                <Card key={i} className="rounded-lg overflow-hidden">
                   <div className="relative aspect-square">
                     <Image src={src} alt={`Generated image ${i + 1}`} fill />
                   </div>

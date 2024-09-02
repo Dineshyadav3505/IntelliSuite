@@ -1,43 +1,40 @@
 import { auth } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
-import Replicate from "replicate"; 
+import { NextResponse } from "next/server";
+import Replicate from "replicate";
 
 const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN!,
+  auth: process.env.REPLICATE_API_KEY,
 });
 
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { userId } = auth(); // Authenticates the user
-
+    const { userId } = auth();
     const body = await req.json();
-    const { prompt } = body; // Extract the prompt from the request body
+    const { prompt } = body;
+    console.log("Prompt1", prompt);
 
-    // Check if the user is authenticated
+
     if (!userId) {
-      return new NextResponse("Unauthorized.", { status: 401 });
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Validate the prompt
     if (!prompt) {
-      return new NextResponse("Prompt is required.", { status: 400 });
+      return new NextResponse("Message is required", { status: 401 });
     }
+    console.log("Prompt", prompt);
 
-    // Call the Replicate API to generate a response
     const response = await replicate.run(
-      "riffusion/riffusion:8cf61ea6c56afd61d8f5b9ffd14d7c216c0a93844ce2d82ac1c9ecc9c7f24e05",
+      "meta/musicgen:671ac645ce5e552cc63a54a2bbff63fcf798043055d2dac5fc9e36a837eedcfb",
       {
         input: {
-          prompt_a: prompt,
+          prompt: prompt,
         },
       }
     );
 
-    // Return the response as JSON
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error("[MUSIC_ERROR]: ", error);
-    return new NextResponse("Internal server error.", { status: 500 });
+    console.log("MUSIC_ERROR", error);
+    return NextResponse.json("Internal Server Error", { status: 500 });
   }
 }
