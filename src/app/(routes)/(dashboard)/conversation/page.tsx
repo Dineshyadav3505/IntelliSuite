@@ -1,4 +1,3 @@
-// frontend/pages/conversation.tsx
 "use client";
 import { z } from "zod";
 import { Heading } from "@/components/Heading";
@@ -12,13 +11,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import {Empty} from "@/components/Empty";
+import { Empty } from "@/components/Empty";
 
 // Define a type for messages
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
+
+interface emptyProps {
+  lable: string;
+}
 
 const Conversation = () => {
   const router = useRouter();
@@ -35,40 +38,43 @@ const Conversation = () => {
   const isSubmitting = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const userMessage: Message = {
+      role: "user",
+      content: values.prompt,
+    };
+
+    // Clear previous error and add user message to state
+    setError(null);
+    setMessages((current) => [...current, userMessage]);
+
     try {
-      const userMessage: Message = {
-        role: "user",
-        content: values.prompt,
-      };
-      const newMessages = [...messages, userMessage];
-
-      // Clear previous error
-      setError(null);
-
       // Send the user message to the API
       const response = await axios.post("/api/conversation", { message: userMessage.content });
 
+      // Check for errors in the response
       if (response.data.error) {
         setError(response.data.error);
-        console.log("response.data.error");
+        console.log("Error in response:", response.data.error);
       } else {
         // Assuming the API returns a structured response
         const assistantMessage: Message = {
           role: "assistant",
-          content: response.data || "No response generated", // Adjust based on your API response
+          content: response.data.message || "No response generated", // Adjust based on your API response
         };
-        console.log(response);
 
-        // Update messages state
-        setMessages((current) => [...current, userMessage, assistantMessage]);
+        // Update messages state with both user and assistant messages
+        setMessages((current) => [...current, assistantMessage]);
         form.reset();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending message:", error);
-      setError("An error occurred while sending your message. Please try again.");
-    } finally {
-      router.refresh();
-    }
+
+      if (error === "Unauthorized") {
+        return router.push("/sign-in");
+      }else{
+        setError("Internal Server Error");
+      }
+    } 
   };
 
   // Function to render message content safely
@@ -116,12 +122,11 @@ const Conversation = () => {
           </Form>
         </div>
         <div className="space-y-4 mt-4 flex-1 overflow-y-auto">
-          <div className="flex flex-col-reverse gap-y-4"> 
+          <div className="flex flex-col-reverse gap-y-4">
             {messages.length === 0 ? (
               <div className="text-center">
-                <Empty lable="No Conversation started." />
-              </div>
-            ) : (
+                <Empty label="No Conversation Started." />
+              </div>) : (
               messages.map((message, index) => (
                 <div className="message" key={index}>
                   {error && index === messages.length - 1 && (

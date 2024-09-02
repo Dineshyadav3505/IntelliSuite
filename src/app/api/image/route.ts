@@ -51,11 +51,13 @@ export async function POST(req: NextRequest) {
           n: parseInt(amount, 10),
           size: resolution, 
         });
+        return NextResponse.json(response.data, { status: 200 });
+      }
+      catch (error: any) {
+        console.error("[IMAGE_ERROR]: ", error);
+        return new NextResponse("Internal server error.", { status: 500 });
 
-    return NextResponse.json(response.data, { status: 200 });
-  } catch (error: any) {
-    console.error("[IMAGE_ERROR]: ", error);
-    return new NextResponse("Internal server error.", { status: 500 });
+      }
   }
-}
-}
+  
+};
