@@ -1,7 +1,7 @@
 "use client";
 import { z } from "zod";
 import { Heading } from "@/components/Heading";
-import {Download, ImageIcon } from "lucide-react";
+import { Download, ImageIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { amountOptions, resolutionOptions, formSchema } from "./constants";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Empty } from "@/components/Empty";
+import CustomImage from "@/components/Image";
 import {
   Select,
   SelectContent,
@@ -24,7 +25,7 @@ import { Card, CardFooter } from "@/components/ui/card";
 // Define a type for images
 type ImageResponse = {
   role: "user" | "assistant";
-  content: string;
+  content: string; // This should hold the image URL
 };
 
 const Image = () => {
@@ -46,21 +47,18 @@ const Image = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       console.log("Form values:", values);
-
       setImages([]);
 
       const response = await axios.post("/api/image", { message: values });
-      // Log the response for debugging
       console.log("Response received:", response.data);
 
       // Assuming the API returns an array of image objects
       const data = response.data.map((image: { url: string }) => ({
         role: "assistant",
-        content: image.url,
+        content: image.url, // Use the image URL here
       }));
 
       setImages(data); // Update images state with the new images
-
       form.reset(); // Reset the form after successful submission
     } catch (error: any) {
       console.error("Error sending message:", error);
@@ -73,12 +71,6 @@ const Image = () => {
     } finally {
       router.refresh(); // Refresh the router if needed
     }
-  };
-
-  // Function to render message content safely
-  const renderMessageContent = (content: string) => {
-    if (!content) return <span>No content available</span>;
-    return <img src={content} alt="Generated" className="w-full" />; // Assuming content is an image URL
   };
 
   return (
@@ -179,25 +171,30 @@ const Image = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
-              {images.map((src, i) => (
-                <Card key={i} className="rounded-lg overflow-hidden">
-                  <div className="relative aspect-square">
-                    <Image src={src} alt={`Generated image ${i + 1}`} fill />
-                  </div>
-  
-                  <CardFooter className="p-2">
-                    <Button
-                      variant="secondary"
-                      className="w-full"
-                      onClick={() => window.open(src)}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+                {images.map((imageResponse, i) => (
+                  <Card key={i} className="rounded-lg overflow-hidden">
+                    <div className="relative aspect-square">
+                      <CustomImage
+                        src={imageResponse.content} // Use the content property for the image source
+                        alt={`Generated image ${i + 1}`}
+                        fill
+                        objectFit="cover"
+                      />
+                    </div>
+
+                    <CardFooter className="p-2">
+                      <Button
+                        variant="secondary"
+                        className="w-full"
+                        onClick={() => window.open(imageResponse.content)} // Use the content property for the download URL
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
             )}
           </div>
         </div>
